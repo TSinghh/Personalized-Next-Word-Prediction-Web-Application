@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-Gram Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            margin: 50px auto;
+            padding: 20px;
+            width: 50%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>N-Gram Word Predictor</h1>
+        <p>Enter at least two words to predict the next word:</p>
+        <form id="predictForm">
+            <input type="text" id="inputText" name="input_text" placeholder="Enter your text here" required>
+            <button type="submit">Predict</button>
+        </form>
+        <div class="output" id="output">
+            <h3>Prediction:</h3>
+            <p id="nextWord"></p>
+            <h4>Probability Distribution:</h4>
+            <pre id="probabilities"></pre>
+        </div>
+    </div>
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const inputText = document.getElementById('inputText').value;
+
+            // Send data to Flask backend
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ input_text: inputText })
+            });
+
+            const result = await response.json();
+            const outputDiv = document.getElementById('output');
+            if (result.error) {
+                outputDiv.style.display = 'block';
+                document.getElementById('nextWord').textContent = result.error;
+                document.getElementById('probabilities').textContent = '';
+            } else {
+                outputDiv.style.display = 'block';
+                document.getElementById('nextWord').textContent = `Next word: ${result.next_word}`;
+                document.getElementById('probabilities').textContent = JSON.stringify(result.probabilities, null, 2);
+            }
+        });
+    </script>
+</body>
+</html>
